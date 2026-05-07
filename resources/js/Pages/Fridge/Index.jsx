@@ -90,30 +90,30 @@ export default function Index() {
     return (
     <AuthenticatedLayout>
         <Head title="冷蔵庫" />
-        <div className="py-12">
+        <div className="py-0 sm:py-12">
             <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <h2 className="text-2xl font-bold mb-6">冷蔵庫</h2>
                     <form onSubmit={editingId ? handleUpdate : handleSubmit} className="mb-6">
-                        <div className="flex gap-2 flex-wrap">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:flex-wrap">
                             <input
                                 type="text"
                                 placeholder="食材名"
                                 value={form.name}
                                 onChange={e => setForm({...form, name: e.target.value})}
-                                className="border rounded p-2"
+                                className="border rounded p-2 w-full sm:w-auto"
                             />
                             <input
                                 type="number"
                                 placeholder="数量"
                                 value={form.quantity}
                                 onChange={e => setForm({...form, quantity: e.target.value})}
-                                className="border rounded p-2 w-24"
+                                className="border rounded p-2 w-full sm:w-auto"
                             />
                             <select
                                 value={form.default_unit}
                                 onChange={e => setForm({...form, default_unit: e.target.value})}
-                                className="border rounded p-2"
+                                className="border rounded p-2 w-full sm:w-auto"
                             >
                                 <option value="g">g</option>
                                 <option value="ml">ml</option>
@@ -123,17 +123,19 @@ export default function Index() {
                                 <option value="袋">袋</option>
                                 <option value="適量">適量</option>
                             </select>
+                            <p>購入日</p>
                             <input
                                 type="date"
                                 value={form.purchased_at}
                                 onChange={e => setForm({...form, purchased_at: e.target.value})}
-                                className="border rounded p-2"
+                                className="border rounded p-2 w-full sm:w-auto"
                             />
+                            <p>賞味期限</p>
                             <input
                                 type="date"
                                 value={form.expiry_date}
                                 onChange={e => setForm({...form, expiry_date: e.target.value})}
-                                className="border rounded p-2"
+                                className="border rounded p-2 w-full sm:w-auto"
                             />
                             <button type="submit" className="bg-blue-500 text-white rounded p-2 px-4">
                                 {editingId ? '更新' : '追加'}
@@ -143,9 +145,9 @@ export default function Index() {
                                     type="button"
                                     onClick={() => {
                                         setEditingId(null)
-                                        setForm({ name: '', quantity: '', default_unit: 'g', purchased_at: '', expiry_days: 3})
+                                        setForm({ name: '', quantity: '', default_unit: 'g', purchased_at: '', expiry_date: ''})
                                     }}
-                                    className="bg-gray-500 text-white rounded p-2 px-4 ml-2"
+                                    className="bg-gray-500 text-white rounded p-2 px-4"
                                 >
                                     キャンセル
                                 </button>
