@@ -4,16 +4,38 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { Refrigerator, BookOpen, Calendar, ShoppingCart, MessageSquare, Settings, Menu } from 'lucide-react';
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
 
-    const [showingNavigationDropdown, setShowingNavigationDropdown] =
-        useState(false);
+    const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+    const [showDrawer, setShowDrawer] = useState(false);
+
+    const [touchStartX, setTouchStartX] = useState(0)
+
+    const handleTouchStart = (e) => {
+        setTouchStartX(e.touches[0].clientX)
+    }
+
+    const handleTouchEnd = (e) => {
+        const touchEndX = e.changedTouches[0].clientX
+        const diff = touchEndX - touchStartX
+        if (touchStartX < 30 && diff > 50) {
+            setShowDrawer(true)
+        }
+        if (diff < -50) {
+            setShowDrawer(false)
+        }
+    }
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <nav className="border-b border-gray-100 bg-white">
+        <div 
+            className="min-h-screen bg-gray-100"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd} 
+        >
+            <nav className="hidden sm:block border-b border-gray-100 bg-white">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between">
                         <div className="flex">
@@ -32,9 +54,6 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </NavLink>
                                 <NavLink href={route('prompt.index')} active={route().current('prompt.index')}>
                                     プロンプト
-                                </NavLink>
-                                <NavLink href={route('settings.index')} active={route().current('settings.index')}>
-                                    設定
                                 </NavLink>
                             </div>
                         </div>
@@ -140,6 +159,9 @@ export default function AuthenticatedLayout({ header, children }) {
                         >
                             Dashboard
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink href={route('settings.index')} active={route().current('settings.index')}>
+                            設定
+                        </ResponsiveNavLink>
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4">
@@ -177,6 +199,63 @@ export default function AuthenticatedLayout({ header, children }) {
             )}
 
             <main>{children}</main>
+            {/* スマホ用ドロワー */}
+            <div
+                className={`fixed inset-0 z-50 sm:hidden transition-opacity duration-300 ${showDrawer ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+            >
+                {/* 背景オーバーレイ */}
+                <div
+                    className="absolute inset-0 bg-black bg-opacity-50"
+                    onClick={() => setShowDrawer(false)}
+                />
+                {/* ドロワー本体 */}
+                <div className={`absolute top-0 left-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ${showDrawer ? 'translate-x-0' : '-translate-x-full'}`}>
+                    <div className="p-4">
+                        <div className="text-base font-medium text-gray-800 mb-1">{user.name}</div>
+                        <div className="text-sm text-gray-500 mb-4">{user.email}</div>
+                        <hr className="mb-4" />
+                        <a href={route('settings.index')} className="block py-2 text-gray-700">設定</a>
+                        <a href={route('profile.edit')} className="block py-2 text-gray-700">プロフィール</a>
+                        <hr className="my-4" />
+                        <Link href={route('logout')} method="post" as="button" className="block py-2 text-red-500">
+                            ログアウト
+                        </Link>
+                    </div>
+                </div>
+            </div>
+
+            {/* スマホ用ボトムナビゲーション */}
+            <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 sm:hidden z-40">
+                <div className="flex items-center h-16">
+                    <a href={route('fridge.index')} className={`flex-1 flex flex-col items-center gap-1 text-xs ${route().current('fridge.index') ? 'text-blue-500' : 'text-gray-500'}`}>
+                        <Refrigerator size={24} />
+                        <span>冷蔵庫</span>
+                    </a>
+                    <a href="/recipes" className={`flex-1 flex flex-col items-center gap-1 text-xs ${route().current('recipes.index') ? 'text-blue-500' : 'text-gray-500'}`}>
+                        <BookOpen size={24} />
+                        <span>レシピ</span>
+                    </a>
+                    <a href={route('calendar.index')} className={`flex-1 flex flex-col items-center gap-1 text-xs ${route().current('calendar.index') ? 'text-blue-500' : 'text-gray-500'}`}>
+                        <Calendar size={24} />
+                        <span>カレンダー</span>
+                    </a>
+                    <a href={route('shopping.index')} className={`flex-1 flex flex-col items-center gap-1 text-xs ${route().current('shopping.index') ? 'text-blue-500' : 'text-gray-500'}`}>
+                        <ShoppingCart size={24} />
+                        <span>買い物</span>
+                    </a>
+                    <a href={route('prompt.index')} className={`flex-1 flex flex-col items-center gap-1 text-xs ${route().current('prompt.index') ? 'text-blue-500' : 'text-gray-500'}`}>
+                        <MessageSquare size={24} />
+                        <span>プロンプト</span>
+                    </a>
+                    <button
+                        onClick={() => setShowDrawer(true)}
+                        className="flex-1 flex flex-col items-center gap-1 text-xs text-gray-500"
+                    >
+                        <Menu size={24} />
+                        <span>メニュー</span>
+                    </button>
+                </div>
+            </nav>
         </div>
     );
 }
