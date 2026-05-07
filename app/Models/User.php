@@ -29,4 +29,29 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function ingredients()
+    {
+        return $this->hasMany(Ingredient::class);
+    }
+
+    public function recipes()
+    {
+        return $this->hasMany(Recipe::class);
+    }
+
+    public function mealPlans()
+    {
+        return $this->hasMany(MealPlan::class);
+    }
+
+    public function shoppingList()
+    {
+        return $this->hasOne(ShoppingList::class);
+    }
+
+    public function dislikedIngredients()
+    {
+        return $this->hasMany(DislikedIngredient::class);
+    }
 }
