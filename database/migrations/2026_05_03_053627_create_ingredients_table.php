@@ -16,9 +16,9 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->decimal('quantity', 8, 2);
-            $table->enum('default_unit', ['g', 'ml', '個', '本', '枚', '適量']);
+            $table->enum('default_unit', ['g', 'ml', '個', '本', '枚', '袋', '適量']);
             $table->date('purchased_at');
-            $table->integer('expiry_days')->default(3);
+            $table->date('expiry_date')->nullable();
             $table->timestamps();
         });
     }

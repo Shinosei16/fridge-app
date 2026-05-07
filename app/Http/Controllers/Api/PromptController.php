@@ -23,7 +23,7 @@ class PromptController extends Controller
         if ($otherRequest) {
             $prompt .= "{$otherRequest}。";
         }
-        $prompt .= 'レシピを以下のJSON形式で返してください。単位はg・ml・個・本・枚・適量のいずれかで統一してください。{"title":"","steps":"","ingredients":[{"name":"","quantity":0,"unit":"","is_seasoning":false}]}';
+        $prompt .= 'レシピを以下のJSON形式で返してください。単位はg・ml・個・本・枚・袋・適量のいずれかで統一してください。{"title":"","steps":"","ingredients":[{"name":"","quantity":0,"unit":"","is_seasoning":false}]}';
 
         return response()->json(['prompt' => $prompt]);
     }
@@ -42,7 +42,7 @@ class PromptController extends Controller
         if ($otherRequest) {
             $prompt .= "{$otherRequest}。";
         }
-        $prompt .= '以下のJSON形式で返してください。単位はg・ml・個・本・枚・適量のいずれかで統一してください。{"items":[{"name":"","quantity":0,"unit":""}]}';
+        $prompt .= '以下のJSON形式で返してください。単位はg・ml・個・本・枚・袋・適量のいずれかで統一してください。{"items":[{"name":"","quantity":0,"unit":""}]}';
 
         return response()->json(['prompt' => $prompt]);
     }

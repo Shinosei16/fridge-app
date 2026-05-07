@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('recipe_ingredients', function (Blueprint $table) {
             $table->id();
             $table->foreignId('recipe_id')->constrained()->onDelete('cascade');
-            $table->foreignId('ingredient_id')->constrained()->onDelete('cascade');
+            $table->string('name')->nullable();
             $table->decimal('quantity', 8, 2);
-            $table->enum('unit', ['g', 'ml', '個', '本', '枚', '適量']);
+            $table->string('unit');
             $table->boolean('is_seasoning')->default(false);
             $table->timestamps();
         });

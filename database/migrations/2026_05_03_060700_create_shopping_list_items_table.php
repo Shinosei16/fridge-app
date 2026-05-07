@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('shopping_list_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->decimal('quantity', 8, 2);
-            $table->enum('unit', ['g', 'ml', '個', '本', '枚', '適量']);
+            $table->enum('unit', ['g', 'ml', '個', '本', '枚', '袋', '適量']);
             $table->timestamps();
         });
     }

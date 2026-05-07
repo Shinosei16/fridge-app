@@ -116,6 +116,7 @@ export default function Index() {
                                 <option value="個">個</option>
                                 <option value="本">本</option>
                                 <option value="枚">枚</option>
+                                <option value="袋">袋</option>
                                 <option value="適量">適量</option>
                             </select>
                             <button type="submit" className="bg-blue-500 text-white rounded p-2 px-4">
@@ -147,6 +148,7 @@ export default function Index() {
                                             <option value="個">個</option>
                                             <option value="本">本</option>
                                             <option value="枚">枚</option>
+                                            <option value="袋">袋</option>
                                             <option value="適量">適量</option>
                                         </select>
                                         <button
