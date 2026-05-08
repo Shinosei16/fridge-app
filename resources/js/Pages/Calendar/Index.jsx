@@ -73,6 +73,85 @@ export default function Index() {
         setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))
     }
 
+    const [touchDragging, setTouchDragging] = useState(null)
+    const [touchPosition, setTouchPosition] = useState({ x: 0, y: 0 })
+
+    const handleTouchStartDrag = (e, recipe) => {
+        setTouchDragging(recipe)
+        setTouchPosition({
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY
+        })
+    }
+
+    const handleTouchMoveDrag = (e) => {
+        if (!touchDragging) return
+        setTouchPosition({
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY
+        })
+    }
+
+    const handleTouchEndDrag = async (e) => {
+        if (!touchDragging) return
+        
+        // タッチ終了位置の要素を取得
+        const element = document.elementFromPoint(touchPosition.x, touchPosition.y)
+        const dropTarget = element?.closest('[data-date]')
+        
+        if (dropTarget) {
+            const dateStr = dropTarget.getAttribute('data-date')
+            await handleDrop(dateStr)
+        } else {
+            const unscheduledTarget = element?.closest('[data-unscheduled]')
+            if (unscheduledTarget && touchDragging.meal_plan) {
+                await axios.put(`/api/meal-plans/${touchDragging.meal_plan.id}`, {
+                    planned_date: null
+                })
+                fetchRecipes()
+            }
+        }
+        
+        setTouchDragging(null)
+    }
+
+    const [selectedRecipe, setSelectedRecipe] = useState(null)
+
+    const handleRecipeTap = (recipe) => {
+        if (selectedRecipe?.id === recipe.id) {
+            setSelectedRecipe(null) // 同じレシピをタップで選択解除
+        } else {
+            setSelectedRecipe(recipe)
+        }
+    }
+
+    const handleDateTap = async (dateStr) => {
+        if (!selectedRecipe) return
+        
+        if (selectedRecipe.meal_plan) {
+            await axios.put(`/api/meal-plans/${selectedRecipe.meal_plan.id}`, {
+                planned_date: dateStr
+            })
+        } else {
+            await axios.post('/api/meal-plans', {
+                recipe_id: selectedRecipe.id,
+                planned_date: dateStr
+            })
+        }
+        
+        setSelectedRecipe(null)
+        fetchRecipes()
+    }
+
+    const handleUnscheduledTap = async () => {
+        if (!selectedRecipe || !selectedRecipe.meal_plan) return
+        await axios.put(`/api/meal-plans/${selectedRecipe.meal_plan.id}`, {
+            planned_date: null
+        })
+        setSelectedRecipe(null)
+        fetchRecipes()
+    }
+
     return (
         <AuthenticatedLayout>
             <Head title="カレンダー" />
@@ -89,6 +168,20 @@ export default function Index() {
                             </span>
                             <button onClick={nextMonth} className="bg-gray-200 rounded px-3 py-1">→</button>
                         </div>
+
+                        {selectedRecipe && (
+                            <div className="mb-4 p-2 bg-yellow-100 border border-yellow-300 rounded flex justify-between items-center">
+                                <span className="text-sm text-yellow-800">
+                                    {selectedRecipe.title}
+                                </span>
+                                <button
+                                    onClick={() => setSelectedRecipe(null)}
+                                    className="text-yellow-800 text-xs underline"
+                                >
+                                    キャンセル
+                                </button>
+                            </div>
+                        )}
 
                         {/* カレンダー */}
                         <div className="grid grid-cols-7 gap-1 mb-2">
@@ -107,9 +200,11 @@ export default function Index() {
                                 return (
                                     <div
                                         key={day}
+                                        data-date={dateStr}
                                         onDrop={() => handleDrop(dateStr)}
                                         onDragOver={handleDragOver}
-                                        className="border rounded min-h-16 p-1"
+                                        onClick={() => handleDateTap(dateStr)}
+                                        className={`border rounded min-h-16 p-1 ${selectedRecipe ? 'cursor-pointer hover:bg-blue-50' : ''}`}
                                     >
                                         <div className="text-sm text-gray-500 mb-1">{day}</div>
                                         {dayRecipes.map(recipe => (
@@ -117,7 +212,8 @@ export default function Index() {
                                                 key={recipe.id}
                                                 draggable
                                                 onDragStart={() => handleDragStart(recipe)}
-                                                className="bg-blue-100 text-blue-700 text-xs rounded p-1 mb-1 cursor-grab"
+                                                onClick={(e) => { e.stopPropagation(); handleRecipeTap(recipe) }}
+                                                className={`text-xs rounded p-1 mb-1 cursor-pointer truncate ${selectedRecipe?.id === recipe.id ? 'bg-yellow-300 text-yellow-800' : 'bg-blue-100 text-blue-700'}`}
                                             >
                                                 {recipe.title}
                                             </div>
@@ -129,6 +225,7 @@ export default function Index() {
 
                         {/* 未定のレシピ */}
                         <div
+                            data-unscheduled="true"
                             onDrop={async () => {
                                 if (!draggedRecipe || !draggedRecipe.meal_plan) return
                                 await axios.put(`/api/meal-plans/${draggedRecipe.meal_plan.id}`, {
@@ -138,16 +235,18 @@ export default function Index() {
                                 fetchRecipes()
                             }}
                             onDragOver={handleDragOver}
+                            onClick={handleUnscheduledTap}
                             className="min-h-16 border-2 border-dashed border-gray-300 rounded p-2"
                         >
-                            <p className="font-bold mb-2">未定のレシピ（ドラッグして日付に配置）</p>
+                            <p className="font-bold mb-2">未定のレシピ</p>
                             <div className="flex flex-wrap gap-2">
                                 {getUnscheduledRecipes().map(recipe => (
                                     <div
                                         key={recipe.id}
                                         draggable
                                         onDragStart={() => handleDragStart(recipe)}
-                                        className="border-2 border-dashed border-gray-300 rounded p-2 cursor-grab text-sm"
+                                        onClick={(e) => { e.stopPropagation(); handleRecipeTap(recipe) }}
+                                        className={`text-xs rounded p-2 cursor-pointer truncate ${selectedRecipe?.id === recipe.id ? 'bg-yellow-300 text-yellow-800 border-2 border-yellow-400' : 'border-2 border-dashed border-gray-300'}`}
                                     >
                                         {recipe.title}
                                     </div>
